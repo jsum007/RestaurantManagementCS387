@@ -20,6 +20,9 @@ import random
 pending_order_list ={}
 dish_states = {}
 dish_quantity = {}
+active_order_tblwise = {}
+tblwise_dish_list = {}
+outletwise_active_ords ={}
 
 
 
@@ -145,41 +148,29 @@ class RegisterCustomer(APIView):
                     'message': 'Invalid Details!'
                 }, status= status.HTTP_400_BAD_REQUEST)
 
-class FetchMenu(APIView):
-    def get(self,request):
-        #data = request.data
-        cursor.execute(
-            'with A as (select dish_id, dish_name, cuisine_name, price from dish, cuisine where dish.cuisine_id = cuisine.cuisine_id),B as (select dish.dish_id, name from ingredients, dish_ingredient, dish where dish.dish_id = dish_ingredient.dish_id and dish_ingredient.ingredient_id = ingredients.ingredient_id and exotic = 1) select A.dish_id, dish_name, price, cuisine_name, name from A,B where A.dish_id = B.dish_id')
-        rows = cursor.fetchall()
-        mergeddict = defaultdict(list)
-        for group in rows:
-            #print(group)
-            mergeddict[group[:-1]].append(group[-1])
-        f_rows = [(k + (tuple(v),))
-                for k, v in mergeddict.items()]
 
-        cursor.execute(
-            'select dish_id, veg from dish_ingredient, ingredients where dish_ingredient.ingredient_id = ingredients.ingredient_id')
-        rows2 = cursor.fetchall()
-        #print(rows2)
-        mergeddict2 = defaultdict(list)
-        for group in rows2:
-            mergeddict[group[:-1]].append(group[-1])
-        f_rows2 = [(k + (tuple(v),) )
-                for k, v in mergeddict.items()]
-        f_rows3 = []
-        for r in f_rows2:
-            is_veg = 1
-            for x in r[1]:
-                if(x == 0):
-                    is_veg = 0
-            f_rows3.append((r[0], is_veg))
-        #print(f_rows3)
-        for i in range(len(f_rows)):
-            f_rows[i] += (f_rows3[i][1],)
-        #print(f_rows)
-        rs = json.dumps(f_rows)
+
+class FetchMenu(APIView):
+    def get(self, request):
+        cursor.execute('select dish_id, dish_name, price, cuisine_name from dish, cuisine where dish.cuisine_id = cuisine.cuisine_id')
+        rows = cursor.fetchall()
+        dishes = []
+        for r in rows:
+            cursor.execute('select name, veg, exotic from ingredients, dish_ingredient, dish where dish.dish_id = dish_ingredient.dish_id and dish_ingredient.ingredient_id = ingredients.ingredient_id and dish.dish_id = %s', (r[0],))
+            ing = cursor.fetchall()
+            ings = []
+            isveg =1
+            for i in ing:
+                if i[2] == 1:
+                    ings.append(i[0])
+                if i[1] == 0:
+                    isveg = 0
+            dishes.append((r[0], r[1], r[2], r[3], tuple(ings), isveg))
+        rs = json.dumps(dishes)
         return HttpResponse(rs, content_type='application/json')
+
+
+
 
 class PlaceOrder(APIView):
     def post(self, request):
@@ -188,11 +179,12 @@ class PlaceOrder(APIView):
         cusid = request.data['customer_id']
         tbid = request.data['table_id'] #'-1' if delivery
         outid = request.data['outlet_id']
-        try:          
+                
 
-        
-            ##Idea is to add all the dishes to pending dishes, assign new order id, use table id to get waiter id , add order id to pending orders
-            ## When Generate Billis clicked fetch payment mode, 
+    
+        ##Idea is to add all the dishes to pending dishes, assign new order id, use table id to get waiter id , add order id to pending orders
+        ## When Generate Billis clicked fetch payment mode,
+        try: 
             cursor.execute('SELECT MAX(order_id) FROM order_relation;')
             last_id = cursor.fetchone()[0]
             if pending_order_list.keys():
@@ -213,6 +205,8 @@ class PlaceOrder(APIView):
                     set2.add(d[0])
                 waiter_id = list(set1.intersection(set2))[0]
                 del_id = -1
+                tblwise_dish_list[(outid,tbid)] = dishes_
+                active_order_tblwise[(outid,tbid)] = new_order_id
                 #print(del_id)
             else:
                 waiter_id = -1
@@ -223,6 +217,19 @@ class PlaceOrder(APIView):
                 del_ppl.append(r[0])
             del_id = random.choice(del_ppl)
 
+            for di in range(len(dishes_)):
+                cursor.execute('select ingredient_id, quantity from dish_ingredient where dish_id = %s', (dishes_[di],))
+                rows = cursor.fetchall()
+                ing_id = []
+                ing_quan = []
+                for r in rows:
+                    ing_id.append(r[0])
+                    ing_quan.append(r[1]*quan_[di])
+            
+            for i in range(len(ing_id)):
+                cursor.execute('update outlet_ingredient set quantity = quantity - %s where ingredient_id = %s and outlet_id = %s', (ing_quan[i], ing_id[i], outid))
+                
+
 
             pending_order_list[new_order_id] = [dishes_, quan_, cusid, tbid, outid, del_id,waiter_id]
             for di in range(len(dishes_)):
@@ -230,13 +237,22 @@ class PlaceOrder(APIView):
                 dish_quantity[(new_order_id, dishes_[di])]=quan_[di]
             #print(pending_order_list)
             #print(dish_states)
+            if outid in  outletwise_active_ords.keys():
+                outletwise_active_ords[outid].append(new_order_id)
+            else:
+                outletwise_active_ords[outid] = [new_order_id]
+            # print(active_order_tblwise)
+            # print(dish_states)
+            print(pending_order_list)
+            # print(outletwise_active_ords)
             return Response({
                 'order_id' : new_order_id
             }, status=status.HTTP_200_OK)
         except:
             return Response({
-                'message': 'Invalid Details!'
+                'message' : 'Invalid Details!'
             }, status=status.HTTP_400_BAD_REQUEST)
+        
 
 class GenerateBill(APIView):
     def post(self, request):
@@ -244,10 +260,12 @@ class GenerateBill(APIView):
         paymode = request.data['paymode']
         
         dishes_, quan_, cusid, tbid, outid, del_id, waiter_id = pending_order_list[ordid]
-        pending_order_list.pop(ordid)
+        
         try:
             ord_type = 'delivery' if int(tbid) == -1 else 'dinein'
             OrderRelation.objects.create(order_id = ordid, payment_mode = paymode, outlet_id = outid, customer_id = cusid, order_type=ord_type, staff_id = del_id)
+            
+            
             return Response({ 'message' : 'Bill Generated'}, status=status.HTTP_200_OK)
         except:
             return Response({
@@ -264,6 +282,27 @@ class OrderPrepared(APIView):
             OrderDish.objects.create(order_id = ordid, dish_id = dish_id, staff_id = chef_id, quantity=quant)
             dish_states[(ordid, dish_id)] = 2 #2 means prepared
             dish_quantity.pop((ordid, dish_id))
+            flag =0            
+            for key, value in dish_states.items():
+                ordid_ , _ = key
+                if ordid_ == ordid and value !=2:
+                    flag =1
+                    break
+
+            if flag == 0:
+                cursor.execute('select outlet_id from chef where staff_id = %s', (chef_id,))
+                outid = cursor.fetchone()[0]
+                outletwise_active_ords[outid].remove(ordid)
+
+                for key, value in active_order_tblwise.items():
+                    if value == ordid:
+                        outid, tbid = key
+                        cursor.execute('update dine_table set available =%s where table_id = %s and outlet_id = %s', (1, tbid, outid))
+                        active_order_tblwise.pop(key)
+                        break
+                
+                pending_order_list.pop(ordid)
+
             return Response({'message': 'Order Prepared!'}, status=status.HTTP_200_OK)
         except:
             return Response({
@@ -343,7 +382,7 @@ class AssignOutlet(APIView):
         
    
 
-class AddtoCart(APIView):
+class AddToCart(APIView):
     def post(self,request):
         dish_id = request.data['dish_id']
         quantity = request.data['quantity']
@@ -369,19 +408,45 @@ class AddtoCart(APIView):
 class GetStaff(APIView):
     def post(self, request):
         outlet_id = request.data['outlet_id']
-        try:
-            cursor.execute('select staff_id from staff where outlet_id = %s', (outlet_id, ))
-            rows = cursor.fetchall()
-            staff_ids = []
-            for r in rows:
-                staff_ids.append((r[0], r[1], r[3], r[4], r[5], r[6], r[7]))
+        if True:
+            cursor.execute('select staff.staff_id , staff.name, staff.attendance, staff.acc_no, staff.ifsc_code, staff.role_assigned, staff.base_salary from staff, chef where staff.staff_id = chef.staff_id and outlet_id = %s', (outlet_id, ))
+            rows1 = cursor.fetchall()
+            cursor.execute('select staff.staff_id , staff.name, staff.attendance, staff.acc_no, staff.ifsc_code, staff.role_assigned, staff.base_salary from staff, manager where staff.staff_id = manager.staff_id and outlet_id = %s', (outlet_id, ))
+            rows2 = cursor.fetchall()
+            cursor.execute('select staff.staff_id , staff.name, staff.attendance, staff.acc_no, staff.ifsc_code, staff.role_assigned, staff.base_salary from staff, other_staff where staff.staff_id = other_staff.staff_id and outlet_id = %s', (outlet_id, ))
+            rows3 = cursor.fetchall()
+            cursor.execute('select staff.staff_id , staff.name, staff.attendance, staff.acc_no, staff.ifsc_code, staff.role_assigned, staff.base_salary from staff, delivery_person where staff.staff_id = delivery_person.staff_id and outlet_id = %s', (outlet_id, ))
+            rows4 = cursor.fetchall()
+            cursor.execute('select staff.staff_id , staff.name, staff.attendance, staff.acc_no, staff.ifsc_code, staff.role_assigned, staff.base_salary from staff, waiter where staff.staff_id = waiter.staff_id and outlet_id = %s', (outlet_id, ))
+            rows5 = cursor.fetchall()
+
+            staff_ids1 = []
+            staff_ids2 = []
+            staff_ids3 = []
+            staff_ids4 = []
+            staff_ids5 = []
+            for r in rows1:
+                staff_ids1.append((r[0], r[1], r[2], r[3], r[4], r[5], r[6]))
+            for r in rows2:
+                staff_ids2.append((r[0], r[1], r[2], r[3], r[4], r[5], r[6]))
+            for r in rows3:
+                staff_ids3.append((r[0], r[1], r[2], r[3], r[4], r[5], r[6]))
+            for r in rows4:
+                staff_ids4.append((r[0], r[1], r[2], r[3], r[4], r[5], r[6]))
+            for r in rows5:
+                staff_ids5.append((r[0], r[1], r[2], r[3], r[4], r[5], r[6]))
+
             return Response({
-                'staff_info' : staff_ids
+                'chef' : staff_ids1,
+                'manager' : staff_ids2,
+                'other_staff' : staff_ids3,
+                'delivery_person' : staff_ids4,
+                'waiter' : staff_ids5
             }, status=status.HTTP_200_OK)
-        except:
-            return Response({
-                'message': 'Invalid Details!'
-            }, status=status.HTTP_400_BAD_REQUEST)
+        # except:
+        #     return Response({
+        #         'message': 'Invalid Details!'
+        #     }, status=status.HTTP_400_BAD_REQUEST)
 class GetChefDetails(APIView):
     def post(self, request):
         staff_id = request.data['staff_id']
@@ -468,33 +533,83 @@ class GetWaiterDetails(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
 
 
+class AvailableTable(APIView):
+    def post(self, request):
+        outid = request.data['outlet_id']
+        try:
+            cursor.execute('select table_id from dine_table where outlet_id = %s and available = 1', (outid, ))
+            rows = cursor.fetchall()
+            table_ids = []
+            for r in rows:
+                table_ids.append(r[0])
+            return Response({
+                'available_tables' : table_ids
+            }, status=status.HTTP_200_OK)
+        except: 
+            return Response({
+                'message': 'Invalid Details!'
+            }, status=status.HTTP_400_BAD_REQUEST)
 
+class ChooseTable(APIView):
+    def post(self, request):
+        table_id = request.data['table_id']
+        outid = request.data['outlet_id']
+        status = request.data['status']
+        try:
+            cursor.execute('update dine_table set available =0 where table_id = %s and outlet_id = %s', (status, table_id, outid))
+            return Response({
+                'message' : 'Table Status Changed!'
+            }, status=status.HTTP_200_OK)
+        except:
+            return Response({
+                'message': 'Invalid Details!'
+            }, status=status.HTTP_400_BAD_REQUEST)
 
+class InventoryUpdate(APIView):
+    def post(self, request):
+        outid = request.data['outlet_id']
+        item_id = request.data['ingredient_id']
+        quantity = request.data['quantity']
+        try:
+            cursor.execute('update outlet_ingredient set quantity = quantity + %s where ingredient_id = %s and outlet_id = %s', (quantity, item_id, outid))
+            return Response({
+                'message' : 'Item Quantity Updated!'
+            }, status=status.HTTP_200_OK)
+        except:
+            return Response({
+                'message': 'Invalid Details!'
+            }, status=status.HTTP_400_BAD_REQUEST)
 
+class GetDishesToPrepare(APIView):
+    def post(self, request):
+        outid = request.data['outlet_id']
+        chefid = request.data['chef_id']
+        try:
+            cursor.execute('select cuisine_id from chef_expertise where staff_id = %s', (chefid, ))
+            expert = cursor.fetchone()[0]
+            active_ords = outletwise_active_ords[outid]
+            dish_ids = []
+            quants =[]
+            for ord in active_ords:
+                dishes_, quan_, cusid, tbid,_, del_id, waiter_id = pending_order_list[ord]
+                for i in range(len(dishes_)):
+                    if dish_states[(ord, dishes_[i])] ==0:
+                        cursor.execute('select cuisine_id from dish where dish_id = %s', (dishes_[i], ))
+                        dish_cuisine = cursor.fetchone()[0]
+                        if dish_cuisine == expert:
+                            dish_ids.append(dishes_[i])
+                            quants.append(quan_[i])
+            
+            return Response({
+                'dishes' : dish_ids,
+                'quantities' : quants
+            }, status=status.HTTP_200_OK)
+        except:
+            return Response({
+                'message': 'Invalid Details!'
+            }, status=status.HTTP_400_BAD_REQUEST) 
 
-def choose_table_id(request):
-    data = json.loads(request.body)
-    cursor.execute(
-        'update top(1) dine_table set available = false where available=true and outlet_id=%s;', data.outlet_id)
-    #rows = cursor.fetchall()
-    return 
-
-
-def inventory_update(request):
-    data = json.loads(request.body)
-    cursor.execute('update outlet_ingredient set quantity = %s where ingredient_id=%s and outlet_id=%s;',
-                   data.quantity, data.ingredient_id, data.outlet_id)
-    return
-
-
-def place_order(request):
-    data = json.loads(request.body)
-    cursor.execute('insert into order_relation(outlet_id,customer_id,deli_id,payment_mode,order_type) values (%s,%s,%s,%s,%s) RETURNING order_id INTO new_order_id;',
-                   data.outlet_id, data.customer_id, data.deli_id, data.payment_mode, data.order_type)
-    cursor.execute('insert into order_dish (order_id,dish_id,chef_id,quantity) values (%s,%s,%s,%s);',
-                   data.order_id, data.dish_id, data.chef_id, data.quantity)
-    cursor.execute('with mid_quantity as (select dish_ingredient.ingredient_id as in_id,order_dish.quantity as cnt_num,dish_ingredient.quantity as base_quantity from order_dish,dish_ingredient where dish_ingredient.dish_id=order_dish.dish_id and order_dish.dish_id=%s ) update outlet_ingredient set quantity=quantity-mid_quantity.base_quantity*mid_quantity.cnt_num from mid_quantity where mid_quantity.in_id=outlet_ingredient.ingredient_id;', data.dish_id)
-    return
+            
 
 
 def salary_update(request):
