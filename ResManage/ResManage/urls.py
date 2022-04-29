@@ -1,4 +1,4 @@
-"""cs387back URL Configuration
+"""ResManage URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/3.1/topics/http/urls/
@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, re_path
 from django.conf.urls import include, url
-from . import views
+#from . import views
 
 urlpatterns = [
     path('', include('restaurant.urls')),

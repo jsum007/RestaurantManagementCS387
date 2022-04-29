@@ -9,11 +9,10 @@ urlpatterns = [
     path("register_staff", views.register_staff, name='register_staff'),
     path("register_customer", views.register_customer, name='register_customer'),
     # Login
-    path("login_staff", views.login_staff, name='login_staff'),
-    path("login_customer", views.login_customer, name='login_customer'),
+    path("login_staff", views.StaffLogin.as_view(), name='login_staff'),
+    path("login_customer", views.CustomerLogin.as_view(), name='login_customer'),
     # Logout
-    path('logout', views.logout, name='logout'),
+    #path('logout', views.logout, name='logout'),
     # welcome
-    path("welcome_page_staff", views.welcome_page_staff, name='welcome_page_staff'),
-    path("welcome_page_customer", views.welcome_page_customer, name='welcome_page_customer'),
+   
 ]

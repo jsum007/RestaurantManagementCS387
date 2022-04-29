@@ -1,5 +1,5 @@
 """
-ASGI config for cs387back project.
+ASGI config for ResManage project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,6 @@ import os
 
 from django.core.asgi import get_asgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'cs387back.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ResManage.settings')
 
 application = get_asgi_application()

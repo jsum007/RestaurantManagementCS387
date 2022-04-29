@@ -52,6 +52,8 @@ class Customer(models.Model):
     work_pincode = models.IntegerField()
     membership_status = models.TextField(blank=True, null=True)
 
+    
+
     class Meta:
 
         db_table = 'customer'
@@ -205,6 +207,8 @@ class Staff(models.Model):
     ifsc_code = models.TextField()
     role_assigned = models.TextField(blank=True, null=True)
     base_salary = models.IntegerField(blank=True, null=True)
+
+
 
     class Meta:
 
