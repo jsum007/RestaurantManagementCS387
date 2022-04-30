@@ -554,9 +554,9 @@ class ChooseTable(APIView):
     def post(self, request):
         table_id = request.data['table_id']
         outid = request.data['outlet_id']
-        status = request.data['status']
+        #status = request.data['status']
         try:
-            cursor.execute('update dine_table set available =0 where table_id = %s and outlet_id = %s', (status, table_id, outid))
+            cursor.execute('update dine_table set available =0 where table_id = %s and outlet_id = %s', (table_id, outid))
             return Response({
                 'message' : 'Table Status Changed!'
             }, status=status.HTTP_200_OK)
