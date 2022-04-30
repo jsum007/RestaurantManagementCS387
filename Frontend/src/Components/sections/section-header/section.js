@@ -7,6 +7,7 @@ import Specs from '../section-specs/specs';
 import SpecOffer from '../spec-offer/specOffer';
 import Stacked from '../stacked-photos/stacked';
 import Footer from '../../navigation/footer/footer';
+import axios from 'axios'
 
 let back = <Brand />;
 class section1 extends Component {
@@ -14,9 +15,17 @@ class section1 extends Component {
         cls1: "circle",
         cls2: "circle",
         cls3: "circle",
-        brand: false
+        brand: false,
+        customer_id:"",
+        customer_name:"",
     }
     componentDidMount() {
+       if( window.location.pathname.split('/').length>2){
+        console.log("34wewerwr");
+        axios.post('//localhost:8000/get_customer_details', {customer_id:window.location.pathname.split('/')[2]})
+            .then((response) => {this.setState({...this.state,customer_id: response.data.customer_id,customer_name:response.data.customer_name });window.localStorage.setItem('myid',window.location.pathname.split('/')[2]);});
+         
+       }
         setTimeout(() => this.clickBtn(1), 30);
 
     }
@@ -46,12 +55,13 @@ class section1 extends Component {
                 <section className="Header">
                     {this.props.children}
                     {back}
-                    <div className="button-offer">
+                   {window.location.pathname.split('/').length<=2 && <div className="button-offer">
                         <GrabBtn url="/login_staff" content="Login(staff)" />
-                    </div>
-                    <div className="button-offer">
+                    </div>}
+                    {window.location.pathname.split('/').length<=2 &&<div className="button-offer">
                         <GrabBtn url="/login_" content="Login(customer)" />
-                    </div>
+                    </div>}
+                    {window.location.pathname.split('/').length>2 && <div className="button-offer" style={{color:'white',fontSize:'24px'}}>{"Welcome "+this.state.customer_name}</div>}
                     <div className="controls">
                         <div className="internal-c">
                             

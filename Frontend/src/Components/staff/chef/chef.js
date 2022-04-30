@@ -5,7 +5,7 @@ import "./chef.css";
 
 class Chef extends Component {
   state={
-    myid:this.props.match.params.id
+    myid: window.location.pathname.split('/')[window.location.pathname.split('/').length - 1]
   }
   render() {
     return (
@@ -31,7 +31,6 @@ class Chef extends Component {
           <h2>Salary</h2>
           <h2>Bonus</h2>
           <h2>Attendance</h2>
-          <Link  class = "linnk" to="chef_history">Dish history</Link>
         </div>
       </div>
 

@@ -14,6 +14,7 @@ import LoginStaff from '../../Components/navigation/login/staff/loginStaff'
 import Chef_preparing from '../../Components/staff/chef/chef_preparing';
 import Chef_history from '../../Components/staff/chef/chef_history';
 import Manager from '../../Components/staff/manager/manager';
+import Delivery from '../../Components/staff/delivery/delivery';
 import Waiter from '../../Components/staff/waiter/waiter';
 import Menu_north from '../../Components/menuSections/menu_north';
 import Menu_south from '../../Components/menuSections/menu_south';
@@ -24,7 +25,7 @@ class allClass extends Component{
     state={
         item:[],
         data:[],
-        loaded:false
+        loaded:false,
       };
       componentDidMount(){
         axios.get("https://twobrother0927.firebaseio.com/.json").then((data)=>{
@@ -134,13 +135,7 @@ class allClass extends Component{
       addItem=(obj)=>{
           let extra=[...this.state.item];
           var check=false;
-          extra.forEach(element=>{
-              if(element.head===obj.head){
-                check=true;  
-                element.counter+=1;
-              }
-
-          });
+          
           if(!check){
             extra.push(obj);
           }
@@ -182,14 +177,15 @@ class allClass extends Component{
             <Route path="/chef_preparing/:id" component={()=><Chef_preparing/>}/>
             <Route path="/chef/:id" component={()=><Chef/>}/>
             <Route path="/manager/:id" component={()=><Manager/>}/>
+            <Route path="/delivery/:id" component={()=><Delivery/>}/>
             <Route path="/waiter/:id" component={()=><Waiter/>}/>
             <Route path="/offers" component={()=><Offer count={this.state.item.length} data={this.state.data.offers.offer} board={this.state.data.offers.board}/>}/>
             <Route path="/cart" component={()=><Cart adding={()=>this.addItem} remove={()=>this.removeItem} data={this.state.item}/> }/>
-            <Route path="/menu_north" component={()=><Menu_north/>}/>
-            <Route path="/menu_south" component={()=><Menu_south/>}/>
-            <Route path="/menu_east" component={()=><Menu_east/>}/>
-            <Route path="/menu_west" component={()=><Menu_west/>}/>
-            <Route path="/menu_central" component={()=><Menu_central/>}/>
+            <Route path="/menu_north" component={()=><Menu_north adding={()=>this.addItem}/>}/>
+            <Route path="/menu_south" component={()=><Menu_south adding={()=>this.addItem}/>}/>
+            <Route path="/menu_east" component={()=><Menu_east adding={()=>this.addItem}/>}/>
+            <Route path="/menu_west" component={()=><Menu_west adding={()=>this.addItem}/>}/>
+            <Route path="/menu_central" component={()=><Menu_central adding={()=>this.addItem}/>}/>
             <Route path="/menu" component={()=><Menu inbox={this.state.item.length} data={this.state.data.menu} loaded={this.state.loaded} adding={()=>this.addItem}/>}/>
             <Route path="/order" component={()=><Order count={this.state.item.length} data={this.state.item}/>}/>
             <Route path="/login_/sign-in" component={()=><SignIn/>}/>

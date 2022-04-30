@@ -5,11 +5,11 @@ import { Button } from "reactstrap";
 import "./waiter.css";
 
 class Waiter extends Component {
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
     
         this.state={
-          id:this.props.match.params.id
+        id: window.location.pathname.split('/')[window.location.pathname.split('/').length - 1]
         }
     
         this.handleChange = this.handleChange.bind(this);
@@ -34,6 +34,7 @@ class Waiter extends Component {
       }
 
   render() {
+
     return (
       <div class="waiter_main">
         <div class="waiter_staff">
