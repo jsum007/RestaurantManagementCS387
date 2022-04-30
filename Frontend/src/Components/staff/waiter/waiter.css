@@ -1,0 +1,126 @@
+.waiter_main {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://media.istockphoto.com/photos/waiter-carrying-plates-with-meat-dish-picture-id1056074028?k=20&m=1056074028&s=612x612&w=0&h=atJn9LwN7YBoQyCi7zqYm2VA-ok4OkeQjjz_uOfWjq0=");
+    min-height: 500px;
+    background-attachment: fixed;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-color: #242424;
+}
+
+.waiter_staff {
+    width: 100%;
+    height: 130px;
+    background-color: #242424;
+    margin-top: 0;
+}
+
+.header_text {
+    margin-top: 0px;
+    margin-left: 20px;
+    padding-top: 20px;
+    color: #ff652f;
+    text-align: left;
+}
+
+.dish_tile {
+    margin-left: 20px;
+    background-color: #ff652f;
+    color: white;
+    width: 200px;
+    height: 150px;
+    border-radius: 5%;
+    font-size: 1.7em;
+}
+
+.left {
+    width: 100px;
+    margin-left: 70px;
+    margin-top: 20px;
+}
+
+button {
+    background-color: #242424;
+    color: white;
+    font-size: 2in;
+}
+
+.chef_info {
+    color: white;
+    width: 40%;
+    height: 400px;
+    background-color: grey;
+    margin-left: 30%;
+    border-radius: 5%;
+    text-align: left;
+    padding-left: 30px;
+    font-size: 1.7em;
+}
+
+.my_profile {
+    padding-top: 20px;
+    text-decoration: underline;
+    text-align: center;
+}
+
+.linnk {
+    color: white;
+    font-size: 1em;
+}
+
+.bill {
+    width: 30%;
+    margin-left: 20px;
+    background-color: grey;
+    height: 220px;
+    border-radius: 5%;
+}
+
+.formField2 {
+    margin-bottom: 40px;
+}
+
+.formFieldLabel2 {
+    display: block;
+    text-transform: uppercase;
+    font-size: 0.9em;
+    color: white;
+}
+
+.formFieldInput2 {
+    width: 85%;
+    background-color: transparent;
+    border: none;
+    color: white;
+    outline: none;
+    border-bottom: 1px solid #445366;
+    font-size: 1em;
+    font-weight: 300;
+    padding-bottom: 10px;
+    margin-top: 10px;
+}
+
+.formFieldInput2::placeholder {
+    color: black;
+}
+
+.formFieldButton2 {
+    background-color: #ff652f;
+    color: white;
+    border: none;
+    outline: none;
+    border-radius: 25px;
+    padding: 15px 70px;
+    font-size: 1em;
+    font-weight: 500;
+}
+
+.formFieldButton2:hover {
+    font-weight: bold;
+}
+
+.waiter_table {
+    width: 80%;
+    padding-bottom: 80px;
+    margin-left: 10%;
+}

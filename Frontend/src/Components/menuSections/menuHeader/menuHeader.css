@@ -1,0 +1,68 @@
+.menuHeader {
+    top: 0;
+    left: 0;
+    height: 60vh;
+    background-attachment: fixed;
+    width: 100%;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://images.unsplash.com/photo-1600891964599-f61ba0e24092?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MXx8YXBwZXRpemVyc3xlbnwwfHwwfHw%3D&w=1000&q=80");
+    background-position: center;
+    background-size: cover;
+}
+
+@media screen and (max-width:660px) {
+    .menuHeader {
+        height: 40vh;
+        background-size: contain;
+        background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.5)), url("https://images.unsplash.com/photo-1600891964599-f61ba0e24092?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MXx8YXBwZXRpemVyc3xlbnwwfHwwfHw%3D&w=1000&q=80");
+    }
+}
+
+.menuTitle {
+    background-color: #242424;
+    padding-right: auto;
+    padding-left: auto;
+    margin-top: 50px;
+    font-size: 300%;
+    width: 15%;
+    opacity: 0.9;
+    border-radius: 250px;
+    font-weight: bold;
+    color: #fff;
+    display: inline-block;
+}
+
+.menuHeader ul {
+    list-style: none;
+    margin: 0 auto;
+}
+
+.menuHeader li a {
+    text-decoration: none;
+    color: #fff;
+}
+
+.menuHeader li .active {
+    font-weight: bold;
+    color: #14a76c;
+    text-decoration: underline;
+}
+
+.menuHeader li .active:hover {
+    color: #fff;
+}
+
+.menuHeader li {
+    font-size: 120%;
+    letter-spacing: 1px;
+    display: inline;
+    padding: 10px 10px;
+}
+
+.menu-options {
+    margin-top: 60px;
+}
+
+.menu_btn {
+    margin-right: 20px;
+    margin-bottom: 20px;
+}

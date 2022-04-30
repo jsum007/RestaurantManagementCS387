@@ -1,0 +1,46 @@
+.specOffer {
+    display: inline-block;
+    height: 30vh;
+    width: 100%;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.5)), url("https://media.istockphoto.com/photos/assorted-indian-recipes-food-various-picture-id922783734?b=1&k=20&m=922783734&s=170667a&w=0&h=sdinF0vMsu_86_JHk3k9092vrY_k2Ee5oSL2Ae16C6s=");
+    background-position: center;
+    background-attachment: fixed;
+    background-size: cover;
+}
+
+.offerArrange {
+    margin-top: 20vh;
+}
+
+.offerHead {
+    font-size: 280%;
+    color: #ffe400;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+}
+
+.offerContent {
+    font-size: 160%;
+    letter-spacing: 2px;
+    color: #fff;
+    text-transform: capitalize;
+}
+
+.offerStarting {
+    display: inline;
+    font-size: 150%;
+    letter-spacing: 1px;
+    color: #ffe400;
+    font-weight: 400;
+    text-transform: capitalize;
+}
+
+.offerDigit {
+    font-size: 250%;
+    color: #14a76c;
+}
+
+
+/* .offerButton{
+
+} */

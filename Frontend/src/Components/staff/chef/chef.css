@@ -1,0 +1,67 @@
+.chef_main {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://wallpaperaccess.com/full/3691341.jpg");
+    background-attachment: fixed;
+    background-position: center;
+    background-size: cover;
+    height: 1000px;
+}
+
+.header_staff {
+    width: 100%;
+    height: 180px;
+    background-color: #242424;
+    margin-top: 0;
+}
+
+.header_text {
+    margin-top: 0px;
+    margin-left: 20px;
+    padding-top: 20px;
+    color: #ff652f;
+    text-align: left;
+}
+
+.dish_tile {
+    margin-left: 20px;
+    background-color: #ff652f;
+    color: white;
+    width: 200px;
+    height: 150px;
+    border-radius: 5%;
+    font-size: 1.7em;
+}
+
+.left {
+    width: 100px;
+    margin-left: 70px;
+    margin-top: 20px;
+}
+
+button {
+    background-color: #242424;
+    color: white;
+    font-size: 2in;
+}
+
+.chef_info {
+    color: white;
+    width: 40%;
+    height: 400px;
+    background-color: grey;
+    margin-left: 30%;
+    border-radius: 5%;
+    text-align: left;
+    padding-left: 30px;
+    font-size: 1.7em;
+}
+
+.my_profile {
+    padding-top: 20px;
+    text-decoration: underline;
+    text-align: center;
+}
+
+.linnk {
+    color: white;
+    font-size: 1em;
+}
